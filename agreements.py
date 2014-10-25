@@ -47,11 +47,13 @@ def plot():
     plt.xlim(0, len(yearids)-1)
     plt.xticks(range(len(yearids)), [yid[:-2] for yid in yearids])
     
-    plt.ylabel("%")
+    plt.ylabel("")
     plt.ylim(0, 100)
+    plt.yticks(np.linspace(0, 100, 6), ["", "20%", "40%", "60%", "80%", "100%"])
     
     plt.legend()
     plt.tight_layout()
+    plt.grid()
     plt.setp(lines, linewidth=3)
     
     plt.show(lines)
