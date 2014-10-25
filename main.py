@@ -5,6 +5,7 @@ import os
 import json
 import codecs
 import logging
+import itertools
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,22 +15,39 @@ DATADIR = "data"
 def main():
     votings = get_votings("201314")
 
-    headcount = get_headcount_by_party(next(iter(votings.values())))
-    parties = list(headcount.keys())
+    print_agreements(get_agreements(votings))
 
+
+def print_agreements(agreements):
+    for pair in sorted(agreements, key=(lambda a: agreements[a]), reverse=True):
+        pairsplit = pair.split("-")
+        pairstr = pairsplit[0].ljust(3) + "-" + pairsplit[1].rjust(3)
+        print("{}:  ".format(pairstr) + "{}".format(agreements[pair]))
+
+
+def get_agreements(votings):
+    headcount = get_headcount_by_party(next(iter(votings.values())))
+    parties = list(sorted(headcount.keys()))
+
+    # [("M", "S"), ("V", "SD"), ...]
+    party_pairs = list(itertools.combinations(parties, 2))
+
+    agreements = dict(zip(["-".join(pair) for pair in party_pairs], [0]*len(party_pairs)))
     supported = dict(zip(parties, [0]*len(parties)))
 
     for key, voting in votings.items():
         votes = get_votes_by_party(voting)
         support = party_support(votes)
 
-        for party in support:
-            if party not in supported:
-                supported[party] = 0
-            supported[party] += 1 if support[party] else 0
-    
-    print(supported)
-    
+        for party_pair in party_pairs:
+
+            # Ensures party is in support dict
+            for party in party_pair:
+                if party not in support:
+                    support[party] = False
+
+            agreements["-".join(party_pair)] += 1 if support[party_pair[0]] == support[party_pair[1]] else 0
+    return agreements
 
 def party_support(votes):
     support = {}
@@ -40,15 +58,16 @@ def party_support(votes):
 def get_headcount_by_party(voting):
     results = {}
     for voter in voting:
-        if voter["parti"] not in results:
-            results[voter["parti"]] = 0
-        results[voter["parti"]] += 1
+        parti = voter["parti"].upper()
+        if parti not in results:
+            results[parti] = 0
+        results[parti] += 1
     return results
 
 
 def get_votings(year: "denotes starting yeartag"):
     results = {}
-    directory = DATADIR + "/votering-"+year
+    directory = DATADIR + "/votering/"+year
     filenames = next(os.walk(directory))[2]
 
     print("Polls: {}".format(len(filenames)))
@@ -64,9 +83,10 @@ def get_votes_by_party(voting):
     party_votes = {}
     len(voting)
     for voter in voting:
-        if voter["parti"] not in party_votes:
-            party_votes[voter["parti"]] = {"Ja": 0, "Nej": 0, "Frånvarande": 0, "Avstår": 0}
-        party_votes[voter["parti"]][voter["rost"]] += 1
+        parti = voter["parti"].upper()
+        if parti not in party_votes:
+            party_votes[parti] = {"Ja": 0, "Nej": 0, "Frånvarande": 0, "Avstår": 0}
+        party_votes[parti][voter["rost"]] += 1
     return party_votes
 
 
