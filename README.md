@@ -5,6 +5,7 @@ Some dataanalysis done on open data from the [Swedish Riksdag](https://en.wikipe
 
 All the data comes from [data.riksdagen.se](http://data.riksdagen.se/).
 
+![example output plot](https://github.com/ErikBjare/MyRiksdag/raw/master/media/example.png)
 
 ## Usage
 
