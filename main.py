@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 import os
 import json
 import codecs
@@ -49,7 +48,9 @@ def get_agreements(votings):
             agreements["-".join(party_pair)] += 1 if support[party_pair[0]] == support[party_pair[1]] else 0
     return agreements
 
+
 def party_support(votes):
+    """Returns a dict with the result of the majority funtion for a set of votes grouped by party"""
     support = {}
     for party in votes:
         support[party] = True if votes[party]["Ja"] > votes[party]["Nej"] else False
@@ -64,18 +65,23 @@ def get_headcount_by_party(voting):
         results[parti] += 1
     return results
 
-
 def get_votings(year: "denotes starting yeartag"):
     results = {}
     directory = DATADIR + "/votering/"+year
     filenames = next(os.walk(directory))[2]
 
-    print("Polls: {}".format(len(filenames)))
+    print("Polls {}: {}".format(year, len(filenames)))
 
     for filename in filenames:
         logging.debug("Reading file {}".format(filename))
         with codecs.open(directory + "/" + filename, "r", "utf-8-sig") as f:
-            results[filename] = json.loads(f.read())["dokvotering"]["votering"]
+            data = json.loads(f.read())
+            try:
+                results[filename] = data["dokvotering"]["votering"]
+            except TypeError as e:
+                print("Something went wrong while parsing poll, skipping")
+                print(data)
+                #raise e
     return results
 
 

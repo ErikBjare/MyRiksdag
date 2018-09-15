@@ -6,14 +6,19 @@ mkdir -p $DIR/data/votering
 cd $DIR/data/votering
 
 download_data() {
-    declare -a years=("200203" "200304" "200405" "200506" 
-                      "200607" "200708" "200809" "200910" 
-                      "201011" "201112" "201213" "201314")
+    declare -a years=("200203" "200304" "200405" "200506"
+                      "200607" "200708" "200809" "200910"
+                      "201011" "201112" "201213" "201314"
+                      "201415" "201415" "201516" "201617" "201718")
 
     for i in "${years[@]}"
     do
-        wget http://data.riksdagen.se/dataset/votering/votering-${i}.json.zip
+        FILENAME="votering-${i}.json.zip"
+        if [ ! -f  $FILENAME ]; then
+            wget http://data.riksdagen.se/dataset/votering/votering-${i}.json.zip
+        fi
     done
+    echo "All data downloaded, to redownload, remove archives in ./data/votering"
 }
 
 unpack_data() {

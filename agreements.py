@@ -1,11 +1,19 @@
+#!/usr/bin/python3
+
 from main import *
 
 from matplotlib import pyplot as plt
 import numpy as np
 
 
+def rainbow_colors(n):
+    colormap = plt.cm.gist_rainbow
+    return [colormap(i) for i in np.linspace(0, 1, n)]
+
+
+# TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
 def plot():
-    yearids = ["20" + str(n).rjust(2, "0") + str(n+1).rjust(2, "0") for n in range(2,14)]
+    yearids = ["20" + str(n).rjust(2, "0") + str(n+1).rjust(2, "0") for n in range(2,18)]
     print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
 
     agreements_by_year = {}
@@ -22,13 +30,12 @@ def plot():
 
     def includes_party(pair):
         has_party = filter_party in pair.split("-") if filter_party else True
-        return pair[0] != "-" and has_party 
+        return pair[0] != "-" and has_party
     party_pairs = sorted(list(filter(includes_party, party_pairs)))
     print("Party pairs: {}".format(party_pairs))
 
     # Set a colormap that is easier to differentiate from
-    colormap = plt.cm.gist_rainbow
-    plt.gca().set_color_cycle([colormap(i) for i in np.linspace(0, 1, len(party_pairs))])
+    plt.gca().set_color_cycle(rainbow_colors(len(party_pairs)))
 
     lines = []
     for party_pair in party_pairs:
@@ -41,22 +48,23 @@ def plot():
                 agreements.append(None)
         lines.append(plt.plot(range(len(yearids)), agreements, label=party_pair))
 
-    plt.title("Percentage of polls where two parties voted the same")
+    plt.title("Percentage of polls where a pair of parties respective majority voted the same")
+    plt.style.use('ggplot')
 
     plt.xlabel("Year")
     plt.xlim(0, len(yearids)-1)
     plt.xticks(range(len(yearids)), [yid[:-2] for yid in yearids])
-    
+
     plt.ylabel("")
     plt.ylim(0, 100)
     plt.yticks(np.linspace(0, 100, 6), ["", "20%", "40%", "60%", "80%", "100%"])
-    
+
     plt.legend()
     plt.tight_layout()
     plt.grid()
     plt.setp(lines, linewidth=3)
-    
+
     plt.show(lines)
-        
+
 if __name__ == "__main__":
     plot()
