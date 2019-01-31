@@ -35,7 +35,7 @@ def plot():
     print("Party pairs: {}".format(party_pairs))
 
     # Set a colormap that is easier to differentiate from
-    plt.gca().set_color_cycle(rainbow_colors(len(party_pairs)))
+    plt.gca().set_prop_cycle('color', rainbow_colors(len(party_pairs)))
 
     lines = []
     for party_pair in party_pairs:
