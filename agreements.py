@@ -4,6 +4,7 @@ from main import *
 
 from matplotlib import pyplot as plt
 import numpy as np
+import argparse
 
 
 def rainbow_colors(n):
@@ -11,22 +12,30 @@ def rainbow_colors(n):
     return [colormap(i) for i in np.linspace(0, 1, n)]
 
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--filter', default='', help='filter on a specific party')
+    return parser.parse_args()
+
+
 # TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
-def plot():
+def plot(args):
     yearids = ["20" + str(n).rjust(2, "0") + str(n+1).rjust(2, "0") for n in range(2,18)]
     print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
+
+    replace_name = lambda x: x if x != 'FP' else 'L'
 
     agreements_by_year = {}
     n_votings = {}
     for yearid in yearids:
         votings = get_votings(yearid)
-        agreements_by_year[yearid] = get_agreements(votings)
+        agreements_by_year[yearid] = get_agreements(votings, replace_name=replace_name)
         n_votings[yearid] = len(votings)
 
     party_pairs = agreements_by_year[yearids[-1]].keys()
 
     # Set to None or "" to not filter by party
-    filter_party = "M"
+    filter_party = args.filter #"M"
 
     def includes_party(pair):
         has_party = filter_party in pair.split("-") if filter_party else True
@@ -66,5 +75,7 @@ def plot():
 
     plt.show(lines)
 
+
 if __name__ == "__main__":
-    plot()
+    args = get_args()
+    plot(args)
