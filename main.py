@@ -24,9 +24,9 @@ def print_agreements(agreements):
         print("{}:  ".format(pairstr) + "{}".format(agreements[pair]))
 
 
-def get_agreements(votings):
+def get_agreements(votings, replace_name=lambda x: x):
     headcount = get_headcount_by_party(next(iter(votings.values())))
-    parties = list(sorted(headcount.keys()))
+    parties = list(sorted(map(replace_name, headcount.keys())))
 
     # [("M", "S"), ("V", "SD"), ...]
     party_pairs = list(itertools.combinations(parties, 2))
@@ -35,7 +35,7 @@ def get_agreements(votings):
     supported = dict(zip(parties, [0]*len(parties)))
 
     for key, voting in votings.items():
-        votes = get_votes_by_party(voting)
+        votes = get_votes_by_party(voting, replace_name=replace_name)
         support = party_support(votes)
 
         for party_pair in party_pairs:
@@ -56,6 +56,7 @@ def party_support(votes):
         support[party] = True if votes[party]["Ja"] > votes[party]["Nej"] else False
     return support
 
+
 def get_headcount_by_party(voting):
     results = {}
     for voter in voting:
@@ -64,6 +65,7 @@ def get_headcount_by_party(voting):
             results[parti] = 0
         results[parti] += 1
     return results
+
 
 def get_votings(year: "denotes starting yeartag"):
     results = {}
@@ -85,11 +87,11 @@ def get_votings(year: "denotes starting yeartag"):
     return results
 
 
-def get_votes_by_party(voting):
+def get_votes_by_party(voting, replace_name=lambda x:x):
     party_votes = {}
     len(voting)
     for voter in voting:
-        parti = voter["parti"].upper()
+        parti = replace_name(voter["parti"].upper())
         if parti not in party_votes:
             party_votes[parti] = {"Ja": 0, "Nej": 0, "Frånvarande": 0, "Avstår": 0}
         party_votes[parti][voter["rost"]] += 1
