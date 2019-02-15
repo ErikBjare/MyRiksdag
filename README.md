@@ -7,11 +7,13 @@ All the data comes from [data.riksdagen.se](http://data.riksdagen.se/).
 
 ![example output plot](https://github.com/ErikBjare/MyRiksdag/raw/master/media/example.png)
 
+## Installation
+1. python3 -m pip install matplotlib
+1. ./get_data.sh (Answer yes to all questions)
+
 ## Usage
 
-To use, first run the `get_data.sh` script. When prompted if you want to download & extract the data answer yes.
-
-Then you can run either `python3 main.py` or `python3 agreements.py`.
+You can run either `python3 main.py` or `python3 agreements.py`.
 
 
 ## Other neat visualizations
