@@ -26,7 +26,7 @@ unpack_data() {
     do
         SRCDIR=$(echo ${i} | grep -o "20[0-9]*")
         mkdir $SRCDIR
-        unzip $i -d $SRCDIR
+        unzip -q $i -d $SRCDIR
     done
 }
 
