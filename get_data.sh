@@ -31,8 +31,8 @@ unpack_data() {
 }
 
 
-if [ -z "$PS1" ]; then
-    # This shell is interactive
+if [ -z "$CI" ]; then
+    # This shell is interactive (not in CI)
     while true; do
         read -p "Do you want to download the files? (yes/no): " yn
         case $yn in
@@ -51,7 +51,7 @@ if [ -z "$PS1" ]; then
         esac
     done
 else
-    # This shell is not interactive
+    # This shell is not interactive (in CI)
     download_data;
     unpack_data;
 fi
