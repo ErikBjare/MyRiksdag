@@ -32,7 +32,7 @@ def build_agreements_by_year(yearids) -> Tuple[Dict[str, dict], Dict[str, int]]:
 
 
 def build_dataframe():
-    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 12)]
+    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 5)]
     agreements_by_year, n_votings = build_agreements_by_year(yearids)
 
     party_pairs = _party_pairs(agreements_by_year)
@@ -50,7 +50,7 @@ def build_dataframe():
     return df
 
 
-def _party_pairs(agreements_by_year):
+def _party_pairs(agreements_by_year, filter_party: str = None):
     last_year = sorted(agreements_by_year.keys())[-1]
     party_pairs = agreements_by_year[last_year].keys()
 
@@ -58,7 +58,7 @@ def _party_pairs(agreements_by_year):
         has_party = filter_party in pair.split("-") if filter_party else True
         return pair[0] != "-" and has_party
 
-    return sorted([pair for pair in party_pairs if includes_party(pair, args.filter)])
+    return sorted([pair for pair in party_pairs if includes_party(pair, filter_party)])
 
 
 # TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
