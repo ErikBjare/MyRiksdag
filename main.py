@@ -17,6 +17,12 @@ def main():
     print_agreements(get_agreements(votings))
 
 
+def _sanitize_party(party):
+    # Fixes some issues in the underlying data,
+    # such as when Folkpartiet renamed themselves to Liberalerna
+    return party if party != 'FP' else 'L'
+
+
 def print_agreements(agreements):
     for pair in sorted(agreements, key=(lambda a: agreements[a]), reverse=True):
         pairsplit = pair.split("-")
@@ -24,22 +30,21 @@ def print_agreements(agreements):
         print("{}:  ".format(pairstr) + "{}".format(agreements[pair]))
 
 
-def get_agreements(votings, replace_name=lambda x: x):
+def get_agreements(votings):
     headcount = get_headcount_by_party(next(iter(votings.values())))
-    parties = list(sorted(map(replace_name, headcount.keys())))
+    parties = sorted([_sanitize_party(party) for party in headcount.keys()])
 
     # [("M", "S"), ("V", "SD"), ...]
     party_pairs = list(itertools.combinations(parties, 2))
 
-    agreements = dict(zip(["-".join(pair) for pair in party_pairs], [0]*len(party_pairs)))
-    supported = dict(zip(parties, [0]*len(parties)))
+    agreements = dict(zip(["-".join(pair) for pair in party_pairs], [0] * len(party_pairs)))
+    supported = dict(zip(parties, [0] * len(parties)))
 
     for key, voting in votings.items():
-        votes = get_votes_by_party(voting, replace_name=replace_name)
+        votes = get_votes_by_party(voting)
         support = party_support(votes)
 
         for party_pair in party_pairs:
-
             # Ensures party is in support dict
             for party in party_pair:
                 if party not in support:
@@ -67,12 +72,12 @@ def get_headcount_by_party(voting):
     return results
 
 
-def get_votings(year: "denotes starting yeartag"):
+def get_votings(yeartag: str):
     results = {}
-    directory = DATADIR + "/votering/"+year
+    directory = DATADIR + "/votering/" + yeartag
     filenames = next(os.walk(directory))[2]
 
-    print("Polls {}: {}".format(year, len(filenames)))
+    print("Polls {}: {}".format(yeartag, len(filenames)))
 
     for filename in filenames:
         logging.debug("Reading file {}".format(filename))
@@ -87,14 +92,15 @@ def get_votings(year: "denotes starting yeartag"):
     return results
 
 
-def get_votes_by_party(voting, replace_name=lambda x:x):
+def get_votes_by_party(voting):
     party_votes = {}
     len(voting)
+
     for voter in voting:
-        parti = replace_name(voter["parti"].upper())
-        if parti not in party_votes:
-            party_votes[parti] = {"Ja": 0, "Nej": 0, "Frånvarande": 0, "Avstår": 0}
-        party_votes[parti][voter["rost"]] += 1
+        party = _sanitize_party(voter["parti"].upper())
+        if party not in party_votes:
+            party_votes[party] = {"Ja": 0, "Nej": 0, "Frånvarande": 0, "Avstår": 0}
+        party_votes[party][voter["rost"]] += 1
     return party_votes
 
 

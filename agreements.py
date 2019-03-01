@@ -23,13 +23,11 @@ def plot(args):
     yearids = ["20" + str(n).rjust(2, "0") + str(n+1).rjust(2, "0") for n in range(2,18)]
     print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
 
-    replace_name = lambda x: x if x != 'FP' else 'L'
-
     agreements_by_year = {}
     n_votings = {}
     for yearid in yearids:
         votings = get_votings(yearid)
-        agreements_by_year[yearid] = get_agreements(votings, replace_name=replace_name)
+        agreements_by_year[yearid] = get_agreements(votings)
         n_votings[yearid] = len(votings)
 
     party_pairs = agreements_by_year[yearids[-1]].keys()
