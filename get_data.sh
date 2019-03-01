@@ -31,20 +31,27 @@ unpack_data() {
 }
 
 
-while true; do
-    read -p "Do you want to download the files? (yes/no): " yn
-    case $yn in
-        [Yy]* ) download_data; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+if [ -z "$PS1" ]; then
+    # This shell is interactive
+    while true; do
+        read -p "Do you want to download the files? (yes/no): " yn
+        case $yn in
+            [Yy]* ) download_data; break;;
+            [Nn]* ) break;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
 
-while true; do
-    read -p "Do you want to unpack the files? (yes/no): " yn
-    case $yn in
-        [Yy]* ) unpack_data; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+    while true; do
+        read -p "Do you want to unpack the files? (yes/no): " yn
+        case $yn in
+            [Yy]* ) unpack_data; break;;
+            [Nn]* ) break;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+else
+    # This shell is not interactive
+    download_data;
+    unpack_data;
+fi
