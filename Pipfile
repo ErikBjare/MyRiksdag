@@ -9,6 +9,3 @@ verify_ssl = true
 matplotlib = "*"
 numpy = "*"
 pandas = "*"
-
-[requires]
-python_version = "3.7"
