@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from main import *
+from main import get_votings, get_agreements
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -20,7 +20,7 @@ def get_args():
 
 # TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
 def plot(args):
-    yearids = ["20" + str(n).rjust(2, "0") + str(n+1).rjust(2, "0") for n in range(2,18)]
+    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 18)]
     print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
 
     agreements_by_year = {}
@@ -33,11 +33,12 @@ def plot(args):
     party_pairs = agreements_by_year[yearids[-1]].keys()
 
     # Set to None or "" to not filter by party
-    filter_party = args.filter #"M"
+    filter_party = args.filter
 
     def includes_party(pair):
         has_party = filter_party in pair.split("-") if filter_party else True
         return pair[0] != "-" and has_party
+
     party_pairs = sorted(list(filter(includes_party, party_pairs)))
     print("Party pairs: {}".format(party_pairs))
 
@@ -59,7 +60,7 @@ def plot(args):
     plt.style.use('ggplot')
 
     plt.xlabel("Year")
-    plt.xlim(0, len(yearids)-1)
+    plt.xlim(0, len(yearids) - 1)
     plt.xticks(range(len(yearids)), [yid[:-2] for yid in yearids])
 
     plt.ylabel("")

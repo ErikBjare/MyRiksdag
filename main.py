@@ -38,7 +38,7 @@ def get_agreements(votings):
     party_pairs = list(itertools.combinations(parties, 2))
 
     agreements = dict(zip(["-".join(pair) for pair in party_pairs], [0] * len(party_pairs)))
-    supported = dict(zip(parties, [0] * len(parties)))
+    # supported = dict(zip(parties, [0] * len(parties)))
 
     for key, voting in votings.items():
         votes = get_votes_by_party(voting)
