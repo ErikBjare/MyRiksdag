@@ -1,0 +1,16 @@
+language: python
+python:
+ - 3.6
+
+before_install:
+ - pip install pipenv
+
+install:
+ - pipenv install
+
+before_script:
+ - ./get_data.sh
+
+script:
+ - pipenv run python3 main.py
+ - pipenv run python3 agreements.py
