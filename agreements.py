@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 
-from main import get_votings, get_agreements
+import argparse
+from typing import Optional, Tuple, List, Dict
 
 from matplotlib import pyplot as plt
 import numpy as np
-import argparse
+import pandas as pd
+
+from main import get_votings, get_agreements
 
 
-def rainbow_colors(n):
+def rainbow_colors(n: int) -> List:
     colormap = plt.cm.gist_rainbow
     return [colormap(i) for i in np.linspace(0, 1, n)]
 
@@ -18,43 +21,57 @@ def get_args():
     return parser.parse_args()
 
 
-# TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
-def plot(args):
-    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 18)]
-    print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
-
+def build_agreements_by_year(yearids) -> Tuple[Dict[str, dict], Dict[str, int]]:
     agreements_by_year = {}
     n_votings = {}
     for yearid in yearids:
         votings = get_votings(yearid)
         agreements_by_year[yearid] = get_agreements(votings)
         n_votings[yearid] = len(votings)
+    return agreements_by_year, n_votings
 
-    party_pairs = agreements_by_year[yearids[-1]].keys()
 
-    # Set to None or "" to not filter by party
-    filter_party = args.filter
+def build_dataframe():
+    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 12)]
+    agreements_by_year, n_votings = build_agreements_by_year(yearids)
 
-    def includes_party(pair):
+    party_pairs = _party_pairs(agreements_by_year)
+    print("Party pairs: {}".format(party_pairs))
+
+    df = pd.DataFrame(index=yearids)
+    df["total"] = n_votings.values()
+    for party_pair in party_pairs:
+        df[party_pair] = pd.Series()
+        for year in agreements_by_year.keys():
+            agreements = agreements_by_year[year]
+            if party_pair in agreements:
+                df[party_pair][year] = agreements_by_year[year][party_pair]
+        df[party_pair] = 100 * df[party_pair] / df["total"]
+    return df
+
+
+def _party_pairs(agreements_by_year):
+    last_year = sorted(agreements_by_year.keys())[-1]
+    party_pairs = agreements_by_year[last_year].keys()
+
+    def includes_party(pair: str, filter_party: Optional[str]):
         has_party = filter_party in pair.split("-") if filter_party else True
         return pair[0] != "-" and has_party
 
-    party_pairs = sorted(list(filter(includes_party, party_pairs)))
-    print("Party pairs: {}".format(party_pairs))
+    return sorted([pair for pair in party_pairs if includes_party(pair, args.filter)])
+
+
+# TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
+def plot(args):
+    df = build_dataframe()
+    yearids = df.index.values
+
+    # print("Plotting for year {} through {}".format(yearids[0], yearids[-1]))
+
+    df.drop('total', axis=1).plot()
 
     # Set a colormap that is easier to differentiate from
-    plt.gca().set_prop_cycle('color', rainbow_colors(len(party_pairs)))
-
-    lines = []
-    for party_pair in party_pairs:
-        agreements = []
-        for yearid in sorted(agreements_by_year.keys()):
-            try:
-                agreements.append(100 * agreements_by_year[yearid][party_pair] / n_votings[yearid])
-            except KeyError:
-                # If one if the parties in the pair is missing from data
-                agreements.append(None)
-        lines.append(plt.plot(range(len(yearids)), agreements, label=party_pair))
+    #plt.gca().set_prop_cycle('color', rainbow_colors(len(party_pairs)))
 
     plt.title("Percentage of polls where a pair of parties respective majority voted the same")
     plt.style.use('ggplot')
@@ -70,11 +87,18 @@ def plot(args):
     plt.legend()
     plt.tight_layout()
     plt.grid()
-    plt.setp(lines, linewidth=3)
 
-    plt.show(lines)
+    plt.show()
 
 
 if __name__ == "__main__":
     args = get_args()
+
     plot(args)
+    """
+    if args.command == "json":
+
+
+    elif args.command == "plot":
+        plot(args)
+        """
