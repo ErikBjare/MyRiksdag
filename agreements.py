@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Any
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -15,13 +15,13 @@ def rainbow_colors(n: int) -> List:
     return [colormap(i) for i in np.linspace(0, 1, n)]
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--filter', default='', help='filter on a specific party')
     return parser.parse_args()
 
 
-def build_agreements_by_year(yearids) -> Tuple[Dict[str, dict], Dict[str, int]]:
+def build_agreements_by_year(yearids: List[str]) -> Tuple[Dict[str, dict], Dict[str, int]]:
     agreements_by_year = {}
     n_votings = {}
     for yearid in yearids:
@@ -31,8 +31,9 @@ def build_agreements_by_year(yearids) -> Tuple[Dict[str, dict], Dict[str, int]]:
     return agreements_by_year, n_votings
 
 
-def build_dataframe():
-    yearids = [f"20{str(n).rjust(2, '0')}{str(n + 1).rjust(2, '0')}" for n in range(2, 5)]
+def build_dataframe() -> pd.DataFrame:
+    years = range(1993, 2019)
+    yearids = [f"{year}{str(year + 1)[2:]}" for year in years]
     agreements_by_year, n_votings = build_agreements_by_year(yearids)
 
     party_pairs = _party_pairs(agreements_by_year)
@@ -50,7 +51,7 @@ def build_dataframe():
     return df
 
 
-def _party_pairs(agreements_by_year, filter_party: str = None):
+def _party_pairs(agreements_by_year: Dict[str, Any], filter_party: str = None) -> List[str]:
     last_year = sorted(agreements_by_year.keys())[-1]
     party_pairs = agreements_by_year[last_year].keys()
 
@@ -62,7 +63,7 @@ def _party_pairs(agreements_by_year, filter_party: str = None):
 
 
 # TODO: Refactor, extract functions, use arguments instead of relying on functions in main.py
-def plot(args):
+def plot(args: argparse.Namespace) -> None:
     df = build_dataframe()
     yearids = df.index.values
 
