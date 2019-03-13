@@ -32,7 +32,7 @@ def build_agreements_by_year(yearids: List[str]) -> Tuple[Dict[str, dict], Dict[
 
 
 def build_dataframe() -> pd.DataFrame:
-    years = range(1993, 2019)
+    years = range(2002, 2018)
     yearids = [f"{year}{str(year + 1)[2:]}" for year in years]
     agreements_by_year, n_votings = build_agreements_by_year(yearids)
 
